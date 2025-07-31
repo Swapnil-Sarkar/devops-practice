@@ -16,18 +16,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install SonarScanner CLI
+      - name: Install SonarScanner
         run: |
-          curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-          unzip sonar-scanner.zip
-          export PATH="$PATH:$(pwd)/sonar-scanner-5.0.1.3006-linux/bin"
+          sudo apt-get update
+          sudo apt-get install -y unzip openjdk-17-jdk
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+          unzip sonar-scanner-cli-5.0.1.3006-linux.zip
+          mv sonar-scanner-5.0.1.3006-linux sonar-scanner
+          export PATH="$PATH:$(pwd)/sonar-scanner/bin"
+          echo "SONAR_SCANNER_PATH=$(pwd)/sonar-scanner/bin" >> $GITHUB_ENV
 
-      - name: Run SonarQube scan
+      - name: Run SonarScanner
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
-          sonar-scanner \
+          $SONAR_SCANNER_PATH/sonar-scanner \
             -Dsonar.projectKey=devops-practice \
             -Dsonar.sources=. \
             -Dsonar.host.url=$SONAR_HOST_URL \
